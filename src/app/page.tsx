@@ -283,7 +283,6 @@ export default function Home() {
   };
 
   const galleryShareText = [
-    "FILM ARMANI SI AMBASSADOR",
     ...officialHashtags,
     "@filmracha",
   ].join("\n");

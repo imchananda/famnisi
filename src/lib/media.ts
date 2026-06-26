@@ -38,9 +38,9 @@ export const platformMarks: Record<Platform, string> = {
 };
 
 export const officialHashtags = [
+  "FILM ARMANI SI AMBASSADOR",
   "#FilmXSiBloom",
   "#ArmaniFragrance",
-  "#filmracha",
 ];
 
 export const mockMediaItems: MediaItem[] = [

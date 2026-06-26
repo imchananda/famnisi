@@ -449,8 +449,16 @@ export default function AdminPage() {
                       ? "bg-white text-[#2a1114] shadow-sm"
                       : "text-[#7c6864] hover:text-[#2a1114]"
                   }`}
+                  aria-label={formatPlatformFilterLabel(platform, language)}
+                  title={formatPlatformFilterLabel(platform, language)}
                 >
-                  <span>{platform === "All" ? t.all : platformShortName(platform)}</span>
+                  <span className="flex h-5 w-5 items-center justify-center">
+                    {platform === "All" ? (
+                      <span className="text-[10px] font-black uppercase">All</span>
+                    ) : (
+                      <PlatformLogo platform={platform} />
+                    )}
+                  </span>
                   <span className="tabular-nums text-[#8d2334]">
                     {platformCounts[platform] ?? 0}
                   </span>
@@ -472,7 +480,7 @@ export default function AdminPage() {
                   <tr>
                     <th className="w-16 px-4 py-3 text-center">{t.no}</th>
                     <th className="w-24 px-4 py-3 text-center">{t.mark}</th>
-                    <th className="w-36 px-4 py-3">{t.platform}</th>
+                    <th className="w-20 px-4 py-3 text-center">{t.platform}</th>
                     <th className="px-4 py-3">{t.media}</th>
                     <th className="min-w-[280px] px-4 py-3">URL</th>
                     <th className="min-w-[210px] px-4 py-3">{t.hashtags}</th>
@@ -511,21 +519,19 @@ export default function AdminPage() {
                           )}
                         </td>
                         <td className="px-4 py-4">
-                          <div className="flex items-center gap-2">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#ead3cc] bg-[#fff4f1] text-[10px] font-bold text-[#8d2334]">
-                              {platformShortName(item.platform)}
-                            </span>
-                            <span className="text-xs font-semibold text-[#7c6864]">
-                              {item.platform}
+                          <div className="flex justify-center">
+                            <span
+                              className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#ead3cc] bg-[#fff4f1] text-[#8d2334]"
+                              title={item.platform}
+                              aria-label={item.platform}
+                            >
+                              <PlatformLogo platform={item.platform} />
                             </span>
                           </div>
                         </td>
                         <td className="px-4 py-4">
                           <p className="max-w-[240px] truncate font-semibold">
                             {item.mediaName || "-"}
-                          </p>
-                          <p className="mt-1 max-w-[260px] truncate text-xs text-[#7c6864]">
-                            {item.title || "-"}
                           </p>
                         </td>
                         <td className="px-4 py-4">
@@ -576,17 +582,17 @@ export default function AdminPage() {
       </div>
 
       {showModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4">
           <button
             type="button"
             className="absolute inset-0 bg-[#2a1114]/45 backdrop-blur-md"
             onClick={closeModal}
             aria-label={t.close}
           />
-          <div className="relative max-h-[94vh] w-full max-w-5xl overflow-hidden rounded-[34px] border border-white/75 bg-[#fffaf6] shadow-[0_34px_130px_rgba(42,17,20,0.32)]">
+          <div className="relative max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-[26px] border border-white/75 bg-[#fffaf6] shadow-[0_30px_100px_rgba(42,17,20,0.28)]">
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ead3cc] via-[#8d2334] to-[#2a1114]" />
 
-            <div className="flex items-start justify-between gap-4 border-b border-[#ead3cc] bg-[linear-gradient(135deg,#fffaf6_0%,#f5ded9_100%)] px-5 py-5 sm:px-7">
+            <div className="flex items-center justify-between gap-4 border-b border-[#ead3cc] bg-[linear-gradient(135deg,#fffaf6_0%,#f5ded9_100%)] px-4 py-3 sm:px-5">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-white/70 bg-white/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-[#8d2334]">
@@ -598,17 +604,11 @@ export default function AdminPage() {
                     </span>
                   ) : null}
                 </div>
-                <h2 className="mt-3 text-2xl font-semibold tracking-wide sm:text-3xl">
-                  {formData.id ? t.editMedia : t.addMedia}
-                </h2>
-                <p className="mt-1 text-xs text-[#7c6864]">
-                  {t.databaseDescription}
-                </p>
               </div>
               <button
                 type="button"
                 onClick={closeModal}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white/80 text-sm font-bold text-[#7c6864] transition hover:text-[#2a1114]"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/80 text-xs font-bold text-[#7c6864] transition hover:text-[#2a1114]"
                 aria-label={t.close}
               >
                 X
@@ -626,16 +626,16 @@ export default function AdminPage() {
             ) : (
               <form
                 onSubmit={submitForm}
-                className="grid max-h-[calc(94vh-118px)] overflow-y-auto lg:grid-cols-[minmax(0,1fr)_320px]"
+                className="max-h-[calc(92vh-58px)] overflow-y-auto"
               >
-                <div className="space-y-5 px-5 py-5 sm:px-7">
-                  <section className="rounded-[26px] border border-[#ead3cc] bg-white/72 p-4">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mx-auto max-w-2xl space-y-3 p-4 sm:p-5">
+                  <section className="rounded-[22px] border border-[#d8b3ad] bg-[#fff4f1]/72 p-3.5 shadow-[0_12px_34px_rgba(111,29,44,0.06)] sm:p-4">
+                    <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-bold text-[#6f1d2c]">
                           {t.focusMedia}
                         </p>
-                        <p className="mt-1 text-xs leading-relaxed text-[#7c6864]">
+                        <p className="mt-0.5 text-[11px] leading-relaxed text-[#7c6864]">
                           {t.focusMediaHint}
                         </p>
                       </div>
@@ -649,21 +649,21 @@ export default function AdminPage() {
                             mark: !current.mark,
                           }))
                         }
-                        className={`relative h-8 w-16 shrink-0 rounded-full p-1 transition ${
+                        className={`relative h-7 w-14 shrink-0 rounded-full p-1 transition ${
                           formData.mark ? "bg-[#8d2334]" : "bg-[#ead3cc]"
                         }`}
                       >
                         <span
-                          className={`block h-6 w-6 rounded-full bg-white shadow-sm transition ${
-                            formData.mark ? "translate-x-8" : "translate-x-0"
+                          className={`block h-5 w-5 rounded-full bg-white shadow-sm transition ${
+                            formData.mark ? "translate-x-7" : "translate-x-0"
                           }`}
                         />
                       </button>
                     </div>
 
-                    <div className="mt-5">
+                    <div className="mt-4">
                       <label className="admin-label">{t.platform}</label>
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                      <div className="grid grid-cols-5 gap-2">
                         {platforms
                           .filter((platform) => platform !== "All")
                           .map((platform) => (
@@ -676,21 +676,23 @@ export default function AdminPage() {
                                   platform: normalizePlatform(platform),
                                 }))
                               }
-                              className={`flex h-11 items-center justify-center gap-2 rounded-2xl border text-xs font-bold transition ${
+                              className={`flex h-10 items-center justify-center gap-2 rounded-xl border text-xs font-bold transition ${
                                 formData.platform === platform
                                   ? "border-[#8d2334] bg-[#8d2334] text-white shadow-[0_14px_30px_rgba(141,35,52,0.22)]"
-                                  : "border-[#ead3cc] bg-white text-[#7c6864] hover:border-[#d8b3ad] hover:text-[#2a1114]"
+                                  : "border-[#d8b3ad] bg-[#fffaf6] text-[#7c6864] hover:border-[#8d2334] hover:text-[#2a1114]"
                               }`}
+                              aria-label={platform}
+                              title={platform}
                             >
-                              <span>{platformShortName(platform)}</span>
+                              <PlatformLogo platform={platform} />
                             </button>
                           ))}
                       </div>
                     </div>
                   </section>
 
-                  <section className="rounded-[26px] border border-[#ead3cc] bg-white/72 p-4">
-                    <div className="grid gap-4 md:grid-cols-2">
+                  <section className="rounded-[22px] border border-[#d8b3ad] bg-[#fff4f1]/72 p-3.5 shadow-[0_12px_34px_rgba(111,29,44,0.06)] sm:p-4">
+                    <div className="grid gap-4">
                       <div className="relative">
                         <label className="admin-label">{t.mediaName}</label>
                         <input
@@ -732,24 +734,9 @@ export default function AdminPage() {
                           </div>
                         ) : null}
                       </div>
-
-                      <div>
-                        <label className="admin-label">{t.title}</label>
-                        <input
-                          value={formData.title}
-                          onChange={(event) =>
-                            setFormData((current) => ({
-                              ...current,
-                              title: event.target.value,
-                            }))
-                          }
-                          placeholder={t.titlePlaceholder}
-                          className="admin-field"
-                        />
-                      </div>
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-3">
                       <label className="admin-label">URL</label>
                       <input
                         required
@@ -775,7 +762,7 @@ export default function AdminPage() {
                       ) : null}
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-3">
                       <label className="admin-label">{t.hashtags}</label>
                       <textarea
                         value={formData.hashtags}
@@ -787,7 +774,7 @@ export default function AdminPage() {
                         }
                         rows={4}
                         placeholder="#FilmXSiBloom"
-                        className="admin-field min-h-32 resize-none py-3 leading-relaxed"
+                        className="admin-field min-h-28 resize-none py-3 leading-relaxed"
                       />
                     </div>
                   </section>
@@ -797,8 +784,10 @@ export default function AdminPage() {
                       {statusMessage}
                     </p>
                   ) : null}
+                </div>
 
-                  <div className="flex flex-col-reverse gap-3 border-t border-[#ead3cc] pt-5 sm:flex-row sm:items-center sm:justify-end">
+                <div className="border-t border-[#ead3cc] bg-[#fffaf6]/90 p-4 sm:px-5">
+                  <div className="mx-auto flex max-w-xl flex-col-reverse gap-3 sm:grid sm:grid-cols-2">
                     <button
                       type="button"
                       onClick={closeModal}
@@ -815,60 +804,6 @@ export default function AdminPage() {
                     </button>
                   </div>
                 </div>
-
-                <aside className="border-t border-[#ead3cc] bg-[#f8efe9]/78 p-5 lg:border-l lg:border-t-0">
-                  <div className="sticky top-5 rounded-[28px] border border-white/80 bg-white/72 p-5 shadow-[0_20px_60px_rgba(111,29,44,0.10)]">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#8d2334]">
-                      Preview
-                    </p>
-                    <div className="mt-4 flex items-center justify-between gap-3">
-                      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#8d2334] text-xs font-bold text-white">
-                        {platformShortName(formData.platform)}
-                      </span>
-                      <span className="rounded-full border border-[#ead3cc] bg-[#fff4f1] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#6f1d2c]">
-                        {formData.mark ? t.focus : t.platform}
-                      </span>
-                    </div>
-
-                    <div className="mt-5 space-y-4">
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#7c6864]">
-                          {t.mediaName}
-                        </p>
-                        <p className="mt-1 min-h-6 break-words text-lg font-semibold text-[#2a1114]">
-                          {formData.mediaName || t.mediaNamePlaceholder}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#7c6864]">
-                          {t.title}
-                        </p>
-                        <p className="mt-1 min-h-5 break-words text-sm leading-relaxed text-[#2a1114]">
-                          {formData.title || t.titlePlaceholder}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#7c6864]">
-                          URL
-                        </p>
-                        <p className="mt-1 line-clamp-2 break-all text-xs leading-relaxed text-[#7c6864]">
-                          {formData.url || "https://..."}
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#7c6864]">
-                          {t.hashtags}
-                        </p>
-                        <p className="mt-2 whitespace-pre-wrap rounded-2xl border border-[#ead3cc] bg-[#fffaf6] p-3 text-xs leading-relaxed text-[#6f1d2c]">
-                          {formData.hashtags || officialHashtags.join("\n")}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </aside>
               </form>
             )}
           </div>
@@ -1089,13 +1024,84 @@ function StatCard({
   );
 }
 
-function platformShortName(platform: (typeof platforms)[number] | Platform) {
-  if (platform === "All") return "All";
-  if (platform === "Instagram") return "IG";
-  if (platform === "Facebook") return "FB";
-  if (platform === "TikTok") return "TT";
-  if (platform === "YouTube") return "YT";
-  return "X";
+function PlatformLogo({ platform }: { platform: Platform }) {
+  const className = "h-5 w-5";
+
+  if (platform === "Instagram") {
+    return (
+      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <rect
+          x="4"
+          y="4"
+          width="16"
+          height="16"
+          rx="5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <circle
+          cx="12"
+          cy="12"
+          r="3.6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <circle cx="17" cy="7" r="1.2" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  if (platform === "Facebook") {
+    return (
+      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <path
+          d="M14.3 8.1h2V4.8c-.35-.05-1.55-.15-2.95-.15-2.92 0-4.92 1.78-4.92 5.05v2.85H5.1v3.7h3.33v7.1h4.05v-7.1h3.23l.52-3.7h-3.75v-2.48c0-1.07.3-1.97 1.82-1.97Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+
+  if (platform === "TikTok") {
+    return (
+      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <path
+          d="M14.7 3.8c.38 2.5 1.78 4.05 4.1 4.2v3.45a7.2 7.2 0 0 1-4.05-1.22v5.98c0 3.03-2 5.28-5.08 5.28A4.86 4.86 0 0 1 4.7 16.6c0-3.34 3.05-5.78 6.32-4.9v3.58c-1.34-.42-2.58.27-2.58 1.6 0 1.02.8 1.68 1.75 1.68 1.08 0 1.78-.67 1.78-2.02V3.8h2.73Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+
+  if (platform === "YouTube") {
+    return (
+      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <path
+          d="M21.25 7.2a3 3 0 0 0-2.1-2.12C17.28 4.6 12 4.6 12 4.6s-5.28 0-7.15.48A3 3 0 0 0 2.75 7.2 31.2 31.2 0 0 0 2.25 12c0 1.63.16 3.26.5 4.8a3 3 0 0 0 2.1 2.12c1.87.48 7.15.48 7.15.48s5.28 0 7.15-.48a3 3 0 0 0 2.1-2.12c.34-1.54.5-3.17.5-4.8s-.16-3.26-.5-4.8ZM10.05 15.45v-6.9L15.88 12l-5.83 3.45Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path
+        d="M14.1 10.25 21.38 2h-1.72l-6.32 7.18L8.29 2H2.48l7.63 10.86L2.48 22h1.72l6.68-7.58L16.21 22h5.81l-7.92-11.75Zm-2.37 2.7-.77-1.08L4.8 3.27h2.67l4.96 6.93.77 1.08 6.46 9.03H17l-5.27-7.36Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function formatPlatformFilterLabel(
+  platform: (typeof platforms)[number],
+  language: Language,
+) {
+  if (platform === "All") return adminText[language].all;
+  return platform;
 }
 
 function translateAdminError(error: string | undefined, language: Language) {
