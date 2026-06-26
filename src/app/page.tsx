@@ -48,6 +48,8 @@ export default function Home() {
   const [generatedMessage, setGeneratedMessage] = useState("");
   const [generatedGalleryCaption, setGeneratedGalleryCaption] = useState("");
   const [messageLanguage, setMessageLanguage] = useState<MessageLanguage>("th");
+  const [galleryCaptionLanguage, setGalleryCaptionLanguage] =
+    useState<MessageLanguage>("th");
   const [barLanguage, setBarLanguage] = useState<MessageLanguage>("th");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isNativeShareSupported, setIsNativeShareSupported] = useState(false);
@@ -287,9 +289,8 @@ export default function Home() {
     "@filmracha",
   ].join("\n");
 
-  const generateGalleryCaption = (language = barLanguage) => {
-    setBarLanguage(language);
-    setMessageLanguage(language);
+  const generateGalleryCaption = (language = galleryCaptionLanguage) => {
+    setGalleryCaptionLanguage(language);
     setGeneratedGalleryCaption(generateRandomMessage(language, messagePools));
     setGalleryCopiedType(null);
   };
@@ -960,7 +961,7 @@ export default function Home() {
                     <div className="flex gap-1">
                       <button
                         type="button"
-                        onClick={() => generateGalleryCaption()}
+                        onClick={() => generateGalleryCaption(galleryCaptionLanguage)}
                         className="rounded-md bg-[#f8efe9] px-2 py-1 text-[10px] font-bold text-[#8d2334]/80 hover:bg-[#ead3cc]/60"
                       >
                         ↻
@@ -982,10 +983,28 @@ export default function Home() {
                   ) : null}
                 </div>
 
+                <div className="mb-2 grid grid-cols-2 gap-1 rounded-xl border border-[#d8b3ad]/25 bg-[#f8efe9] p-1">
+                  {(["th", "en"] as const).map((language) => (
+                    <button
+                      key={language}
+                      type="button"
+                      onClick={() => generateGalleryCaption(language)}
+                      className={`rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] transition-all ${
+                        galleryCaptionLanguage === language
+                          ? "bg-white text-[#2a1114] shadow-sm"
+                          : "text-[#8d2334]/70 hover:text-[#2a1114]"
+                      }`}
+                      aria-pressed={galleryCaptionLanguage === language}
+                    >
+                      {language.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+
                 {!generatedGalleryCaption ? (
                   <button
                     type="button"
-                    onClick={() => generateGalleryCaption()}
+                    onClick={() => generateGalleryCaption(galleryCaptionLanguage)}
                     className="flex items-center justify-center gap-2 rounded-xl border border-[#d8b3ad]/25 bg-[#f8efe9] py-3.5 text-xs font-bold text-[#2a1114] shadow-sm transition-all hover:bg-[#ead3cc]/60 active:scale-[0.98]"
                   >
                     {barLabels.rollCaption}
