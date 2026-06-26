@@ -427,7 +427,7 @@ export default function AdminPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative flex-1">
               <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[#8d2334]">
-                Search
+                {language === "th" ? "ค้นหา" : "Search"}
               </span>
               <input
                 type="search"
@@ -454,7 +454,9 @@ export default function AdminPage() {
                 >
                   <span className="flex h-5 w-5 items-center justify-center">
                     {platform === "All" ? (
-                      <span className="text-[10px] font-black uppercase">All</span>
+                      <span className="text-[10px] font-black uppercase">
+                        {language === "th" ? "ทั้งหมด" : "All"}
+                      </span>
                     ) : (
                       <PlatformLogo platform={platform} />
                     )}

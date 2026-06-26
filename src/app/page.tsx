@@ -214,6 +214,7 @@ export default function Home() {
 
       setBarLanguage(savedLanguage);
       setMessageLanguage(savedLanguage);
+      setGalleryCaptionLanguage(savedLanguage);
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
@@ -222,6 +223,7 @@ export default function Home() {
   const changeLanguage = (language: MessageLanguage) => {
     setBarLanguage(language);
     setMessageLanguage(language);
+    setGalleryCaptionLanguage(language);
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
   };
 
@@ -537,7 +539,15 @@ export default function Home() {
                   key={platform}
                   type="button"
                   onClick={() => setActivePlatform(platform)}
-                  aria-label={`Filter ${platform}`}
+                  aria-label={
+                    barLanguage === "th"
+                      ? platform === "All"
+                        ? "แสดงทั้งหมด"
+                        : `กรองเฉพาะ ${platform}`
+                      : platform === "All"
+                        ? "Show all"
+                        : `Filter ${platform}`
+                  }
                   className={`inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold leading-none transition ${
                     isActive
                       ? "border-[#8d2334] bg-[#8d2334] text-white shadow-[0_12px_26px_rgba(141,35,52,0.2)]"
@@ -674,7 +684,11 @@ export default function Home() {
                       <div className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#f8efe9]">
                         <Image
                           src={item.image}
-                          alt={item.title}
+                          alt={
+                            barLanguage === "th"
+                              ? `รูปแกลเลอรี่ ${item.title.replace("Gallery ", "")}`
+                              : item.title
+                          }
                           width={900}
                           height={1200}
                           sizes="(min-width: 1024px) 22vw, (min-width: 640px) 30vw, 45vw"
@@ -821,14 +835,14 @@ export default function Home() {
                       onClick={() => generateMessage("th")}
                       className="flex-1 rounded-xl border border-[#d8b3ad]/25 bg-[#f8efe9] py-4 text-[13px] font-bold text-[#2a1114] shadow-sm transition-all hover:bg-[#ead3cc]/60"
                     >
-                      THAI
+                      {barLanguage === "th" ? "ภาษาไทย" : "THAI"}
                     </button>
                     <button
                       type="button"
                       onClick={() => generateMessage("en")}
                       className="flex-1 rounded-xl border border-[#d8b3ad]/25 bg-[#f8efe9] py-4 text-[13px] font-bold text-[#2a1114] shadow-sm transition-all hover:bg-[#ead3cc]/60"
                     >
-                      ENGLISH
+                      {barLanguage === "th" ? "ภาษาอังกฤษ" : "ENGLISH"}
                     </button>
                   </div>
                 ) : (
@@ -919,7 +933,11 @@ export default function Home() {
               <div className="group relative overflow-hidden rounded-2xl border border-[#d8b3ad]/30 bg-white p-1.5 shadow-inner">
                 <Image
                   src={selectedGalleryItem.image}
-                  alt={selectedGalleryItem.title}
+                  alt={
+                    barLanguage === "th"
+                      ? `รูปแกลเลอรี่ ${selectedGalleryItem.title.replace("Gallery ", "")}`
+                      : selectedGalleryItem.title
+                  }
                   width={900}
                   height={1200}
                   sizes="(min-width: 640px) 380px, 92vw"
@@ -1166,7 +1184,15 @@ export default function Home() {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
               className="group flex flex-1 cursor-pointer flex-col items-center justify-center transition-all active:scale-95"
-              aria-label={activeView === "media" ? "Open gallery" : "Open media list"}
+              aria-label={
+                barLanguage === "th"
+                  ? activeView === "media"
+                    ? "เปิดแกลเลอรี่"
+                    : "เปิดรายการสื่อ"
+                  : activeView === "media"
+                    ? "Open gallery"
+                    : "Open media list"
+              }
             >
               <div
                 className={`transition-all duration-300 ${
