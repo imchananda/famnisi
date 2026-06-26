@@ -1,0 +1,206 @@
+import { parseCSV } from "./csv";
+
+export type Platform =
+  | "X"
+  | "Instagram"
+  | "Facebook"
+  | "TikTok"
+  | "YouTube";
+
+export type MediaItem = {
+  id: string;
+  title: string;
+  mediaName: string;
+  date: string;
+  platform: Platform;
+  avatar: string;
+  checked: boolean;
+  url: string;
+  hashtags: string;
+  mark: boolean;
+};
+
+export const platforms = [
+  "All",
+  "X",
+  "Instagram",
+  "Facebook",
+  "TikTok",
+  "YouTube",
+] as const;
+
+export const platformMarks: Record<Platform, string> = {
+  X: "X",
+  Instagram: "IG",
+  Facebook: "FB",
+  TikTok: "TT",
+  YouTube: "YT",
+};
+
+export const officialHashtags = [
+  "#FilmXSiBloom",
+  "#ArmaniFragrance",
+  "#filmracha",
+];
+
+export const mockMediaItems: MediaItem[] = [
+  {
+    id: "1",
+    title: "Armani Si Bloom Ambassador Reveal",
+    mediaName: "Giorgio Armani Thailand",
+    date: "Jun 24, 2026",
+    platform: "Instagram",
+    avatar: "GA",
+    checked: true,
+    url: "https://www.instagram.com/",
+    hashtags: officialHashtags.join("\n"),
+    mark: true,
+  },
+  {
+    id: "2",
+    title: "Film Rachanun Fronts New Fragrance Chapter",
+    mediaName: "Vogue Thailand",
+    date: "Jun 23, 2026",
+    platform: "X",
+    avatar: "VT",
+    checked: false,
+    url: "https://www.vogue.co.th/",
+    hashtags: officialHashtags.join("\n"),
+    mark: false,
+  },
+  {
+    id: "3",
+    title: "Si Bloom Campaign Visual Premiere",
+    mediaName: "ELLE Thailand",
+    date: "Jun 22, 2026",
+    platform: "Facebook",
+    avatar: "ET",
+    checked: false,
+    url: "https://www.facebook.com/",
+    hashtags: officialHashtags.join("\n"),
+    mark: false,
+  },
+  {
+    id: "4",
+    title: "Behind the Bloom with Film Rachanun",
+    mediaName: "Armani Beauty",
+    date: "Jun 21, 2026",
+    platform: "YouTube",
+    avatar: "AB",
+    checked: true,
+    url: "https://www.youtube.com/",
+    hashtags: officialHashtags.join("\n"),
+    mark: true,
+  },
+  {
+    id: "5",
+    title: "Campaign Moment: Soft Rose, Deep Rouge",
+    mediaName: "Harper's Bazaar Thailand",
+    date: "Jun 20, 2026",
+    platform: "X",
+    avatar: "HB",
+    checked: false,
+    url: "https://harpersbazaar.co.th/",
+    hashtags: officialHashtags.join("\n"),
+    mark: false,
+  },
+  {
+    id: "6",
+    title: "Film x Si Bloom Fan Engagement Thread",
+    mediaName: "@filmracha_updates",
+    date: "Jun 19, 2026",
+    platform: "X",
+    avatar: "FX",
+    checked: true,
+    url: "https://x.com/",
+    hashtags: officialHashtags.join("\n"),
+    mark: true,
+  },
+  {
+    id: "7",
+    title: "Fragrance Ambassador Short Clip",
+    mediaName: "Giorgio Armani Beauty TH",
+    date: "Jun 18, 2026",
+    platform: "TikTok",
+    avatar: "GT",
+    checked: false,
+    url: "https://www.tiktok.com/",
+    hashtags: officialHashtags.join("\n"),
+    mark: false,
+  },
+];
+
+export function normalizePlatform(value: string): Platform {
+  const raw = value.toLowerCase().trim();
+
+  if (["x", "twitter"].includes(raw)) return "X";
+  if (["ig", "instagram", "insta"].includes(raw)) return "Instagram";
+  if (["fb", "facebook"].includes(raw)) return "Facebook";
+  if (["tt", "tiktok"].includes(raw)) return "TikTok";
+  if (["yt", "youtube"].includes(raw)) return "YouTube";
+  return "X";
+}
+
+export function parseMediaItemsFromCSV(csvText: string): MediaItem[] {
+  const rows = parseCSV(csvText.replace(/^\uFEFF/, ""));
+  if (rows.length === 0) return [];
+
+  const headers = rows[0].map((header) => header.toLowerCase().trim());
+  const getVal = (values: string[], headerName: string) => {
+    const index = headers.indexOf(headerName.toLowerCase().trim());
+    return index !== -1 ? values[index] || "" : "";
+  };
+
+  return rows
+    .slice(1)
+    .map((values, index) => {
+      const platform = normalizePlatform(getVal(values, "platform") || "x");
+      const mediaName =
+        getVal(values, "media") ||
+        getVal(values, "mediaName") ||
+        getVal(values, "media_name") ||
+        getVal(values, "ชื่อสื่อ") ||
+        "";
+      const title =
+        getVal(values, "title") ||
+        getVal(values, "note") ||
+        mediaName ||
+        `${platform} Campaign Post`;
+      const url = getVal(values, "url");
+      const hashtags =
+        getVal(values, "hashtags") ||
+        getVal(values, "hashtag") ||
+        officialHashtags.join("\n");
+      const rawMark = getVal(values, "mark").toLowerCase().trim();
+      const mark =
+        rawMark === "1" ||
+        rawMark === "true" ||
+        rawMark === "yes" ||
+        rawMark === "x" ||
+        rawMark === "สำคัญ";
+
+      return {
+        id: getVal(values, "id") || url || String(index + 1),
+        title,
+        mediaName,
+        date: getVal(values, "date") || getVal(values, "created_at") || "",
+        platform,
+        avatar: getAvatar(mediaName || platform),
+        checked: false,
+        url,
+        hashtags,
+        mark,
+      };
+    })
+    .filter((item) => item.url || item.title || item.mediaName)
+    .reverse();
+}
+
+function getAvatar(label: string) {
+  return label
+    .split(/[\s_@.-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase())
+    .join("");
+}

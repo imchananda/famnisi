@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8efe9;
+  --foreground: #2a1114;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Noto Sans Thai", "Noto Sans", Arial, Helvetica, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Noto Sans Thai", "Noto Sans", Arial, Helvetica, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: #8d2334;
+  color: #fffaf6;
+}
+
+.luxury-display {
+  font-family: "Noto Sans Thai", "Noto Sans", Arial, Helvetica, sans-serif;
+}
+
+.admin-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  color: #7c6864;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-field {
+  width: 100%;
+  min-height: 3rem;
+  border-radius: 1rem;
+  border: 1px solid #d8b3ad;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0 1rem;
+  color: #2a1114;
+  font-size: 0.875rem;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.admin-field:focus {
+  border-color: #8d2334;
+  box-shadow: 0 0 0 4px rgba(141, 35, 52, 0.1);
+  background: #ffffff;
+}
