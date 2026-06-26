@@ -390,7 +390,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f8efe9] pb-28 text-[#2a1114]">
+    <main className="min-h-screen bg-transparent pb-28 text-[#2a1114]">
       <section
         id="top"
         className="mx-auto grid max-w-[1500px] gap-5 px-5 py-10 text-center sm:px-8 md:min-h-[620px] md:grid-cols-[45%_55%] md:items-center md:gap-8 md:py-10 md:text-left lg:px-10 xl:min-h-[720px] xl:grid-cols-[40%_60%] xl:py-12"
@@ -401,25 +401,34 @@ export default function Home() {
             alt="Giorgio Armani"
             priority
             sizes="(min-width: 1024px) 360px, (min-width: 640px) 300px, 240px"
-            className="mx-auto mb-9 h-auto w-60 object-contain sm:w-72 md:mx-0 lg:w-72 xl:w-80"
+            className="mx-auto mb-9 h-auto w-60 object-contain sm:w-72 md:mx-0 lg:w-72 xl:w-80 animate-fade-in-up"
+            style={{ animationDelay: "100ms" }}
           />
-          <h1 className="luxury-display text-4xl font-medium leading-[0.95] tracking-[0.04em] text-[#2a1114] sm:text-5xl md:text-5xl xl:text-7xl">
-            {barLanguage === "th" ? "ฟิล์ม รชานันท์" : "FILM RACHANUN"}
+          <h1 className="luxury-title text-4xl font-normal leading-[1.0] tracking-[0.1em] text-[#2a1114] sm:text-5xl md:text-5xl xl:text-7xl animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+            {barLanguage === "th" ? (
+              "ฟิล์ม รชานันท์"
+            ) : (
+              <>
+                Film
+                <br />
+                Rachanun
+              </>
+            )}
           </h1>
-          <p className="mx-auto mt-7 max-w-2xl text-sm font-medium uppercase leading-snug tracking-[0.12em] text-[#8d2334] sm:text-lg md:mx-0 md:text-xl xl:text-2xl">
+          <p className="mx-auto mt-6 max-w-2xl text-xs font-normal uppercase leading-relaxed tracking-[0.18em] text-[#c61a30] sm:text-sm md:mx-0 md:text-base xl:text-lg animate-fade-in-up" style={{ animationDelay: "300ms" }}>
             Giorgio Armani Thailand
             <br />
             Fragrance Ambassador
           </p>
-          <p className="luxury-display mt-5 text-xs font-normal uppercase tracking-[0.2em] text-[#6f1d2c] sm:text-base md:text-4xl xl:text-5xl">
+          <p className="luxury-display mt-6 text-xs font-light uppercase tracking-[0.25em] text-[#a01428] sm:text-base md:text-3xl xl:text-4xl animate-fade-in-up" style={{ animationDelay: "400ms" }}>
             Armani Si Bloom
           </p>
 
-          <div className="mt-8 hidden flex-wrap justify-center gap-3 md:flex md:justify-start">
+          <div className="mt-8 hidden flex-wrap justify-center gap-3 md:flex md:justify-start animate-fade-in-up" style={{ animationDelay: "500ms" }}>
             {["#FilmXSiBloom", "#ArmaniFragrance", "#filmracha"].map((tag) => (
               <span
                 key={tag}
-                className="rounded-full border border-[#d7aeb0] bg-[#fffaf6] px-4 py-2 text-sm font-medium text-[#7b2531]"
+                className="rounded-full border border-[#c61a30]/30 bg-[#fff6f6] px-4 py-2 text-sm font-medium text-[#c61a30]"
               >
                 {tag}
               </span>
@@ -427,7 +436,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="relative flex justify-center overflow-visible md:h-[500px] md:-ml-6 md:justify-end xl:h-[620px] xl:-ml-16">
+        <div className="relative flex justify-center overflow-visible md:h-[500px] md:-ml-6 md:justify-end xl:h-[620px] xl:-ml-16 animate-fade-in-up" style={{ animationDelay: "250ms" }}>
           <Image
             src="/images/hero-film-armani.png?v=202606262116"
             alt="Film Rachanun for Giorgio Armani Si Bloom campaign"
@@ -440,11 +449,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="media-list" className="bg-[#fffaf6] py-16 sm:py-20">
+      <section id="media-list" className="bg-[#fffaf6]/70 border-t border-[#ead3cc]/40 py-16 sm:py-20 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
           <div className="flex flex-row items-center justify-between gap-4">
             <div className="min-w-0">
-              <h2 className="luxury-display text-2xl font-medium uppercase tracking-[0.18em] text-[#8d2334] sm:text-3xl lg:text-4xl">
+              <h2 className="luxury-display text-2xl font-light uppercase tracking-[0.2em] text-[#8d2334] sm:text-3xl lg:text-4xl">
                 {activeView === "gallery" ? barLabels.gallery : barLabels.mediaList}
               </h2>
             </div>
@@ -659,8 +668,8 @@ export default function Home() {
                       key={item.id}
                       type="button"
                       onClick={() => openGalleryItem(item)}
-                      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-[#d8b3ad]/35 bg-white p-1.5 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#8d2334]/45 hover:shadow-[0_16px_40px_rgba(111,29,44,0.13)]"
-                      style={{ animationDelay: `${index * 40}ms` }}
+                      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-[#d8b3ad]/35 bg-white p-1.5 text-left shadow-sm animate-fade-in-up transition-all duration-500 ease-out hover:-translate-y-1.5 hover:border-[#8d2334]/40 hover:shadow-[0_20px_50px_rgba(111,29,44,0.12)]"
+                      style={{ animationDelay: `${index * 60}ms` }}
                     >
                       <div className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#f8efe9]">
                         <Image
@@ -669,11 +678,11 @@ export default function Home() {
                           width={900}
                           height={1200}
                           sizes="(min-width: 1024px) 22vw, (min-width: 640px) 30vw, 45vw"
-                          className="h-full w-full object-cover object-top transition-all duration-500 group-hover:scale-[1.04]"
+                          className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.05]"
                         />
                       </div>
 
-                      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-lg border border-white/45 bg-[#fffaf6]/82 px-2 py-1 opacity-0 shadow-sm backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100">
+                      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-lg border border-white/45 bg-[#fffaf6]/82 px-2 py-1 opacity-0 translate-y-2 shadow-sm backdrop-blur-md transition-all duration-500 ease-out group-hover:opacity-100 group-hover:translate-y-0">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[#2a1114]">
                           {barLabels.look} {index + 1}
                         </span>

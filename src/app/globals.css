@@ -10,10 +10,12 @@
   --color-foreground: var(--foreground);
   --font-sans: "Noto Sans Thai", "Noto Sans", Arial, Helvetica, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --font-serif-luxury: "Italiana", "Bodoni Moda", "Noto Sans Thai", "Noto Sans", Georgia, serif;
+  --font-sans-luxury: "Outfit", "Noto Sans Thai", "Noto Sans", sans-serif;
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(135deg, #ffffff 0%, #faf1eb 50%, #f6dfd5 100%) fixed;
   color: var(--foreground);
   font-family: "Noto Sans Thai", "Noto Sans", Arial, Helvetica, sans-serif;
 }
@@ -28,7 +30,13 @@ html {
 }
 
 .luxury-display {
-  font-family: "Noto Sans Thai", "Noto Sans", Arial, Helvetica, sans-serif;
+  font-family: "Italiana", "Bodoni Moda", "Noto Sans Thai", "Noto Sans", Georgia, serif;
+  letter-spacing: 0.08em;
+}
+
+.luxury-title {
+  font-family: "Outfit", "Noto Sans Thai", "Noto Sans", sans-serif;
+  letter-spacing: 0.12em;
 }
 
 .admin-label {
@@ -70,4 +78,19 @@ html {
     0 0 0 4px rgba(141, 35, 52, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
   background: #fffaf6;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
