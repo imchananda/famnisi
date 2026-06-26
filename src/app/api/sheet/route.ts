@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   const sheetId = process.env.SHEET_ID;
   const { searchParams } = new URL(request.url);
@@ -15,7 +17,7 @@ export async function GET(request: Request) {
   try {
     const response = await fetch(
       `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`,
-      { next: { revalidate: 60 } },
+      { cache: "no-store" },
     );
 
     if (!response.ok) {
