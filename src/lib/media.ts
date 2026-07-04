@@ -56,6 +56,23 @@ export function normalizePlatform(value: string): Platform {
   return "X";
 }
 
+export function getGlobalHashtagsFromCSV(csvText: string): string {
+  const rows = parseCSV(csvText.replace(/^\uFEFF/, ""));
+  if (rows.length === 0) return officialHashtags.join("\n");
+
+  const headers = rows[0].map((header) => header.toLowerCase().trim());
+  const getVal = (values: string[], headerName: string) => {
+    const index = headers.indexOf(headerName.toLowerCase().trim());
+    return index !== -1 ? values[index] || "" : "";
+  };
+
+  const configRow = rows.slice(1).find((row) => getVal(row, "id") === "global_settings");
+  if (configRow) {
+    return getVal(configRow, "hashtags") || getVal(configRow, "hashtag") || officialHashtags.join("\n");
+  }
+  return officialHashtags.join("\n");
+}
+
 export function parseMediaItemsFromCSV(csvText: string): MediaItem[] {
   const rows = parseCSV(csvText.replace(/^\uFEFF/, ""));
   if (rows.length === 0) return [];
@@ -66,8 +83,11 @@ export function parseMediaItemsFromCSV(csvText: string): MediaItem[] {
     return index !== -1 ? values[index] || "" : "";
   };
 
+  const globalHashtags = getGlobalHashtagsFromCSV(csvText);
+
   return rows
     .slice(1)
+    .filter((row) => getVal(row, "id") !== "global_settings")
     .map((values, index) => {
       const platform = normalizePlatform(getVal(values, "platform") || "x");
       const mediaName =
@@ -82,10 +102,6 @@ export function parseMediaItemsFromCSV(csvText: string): MediaItem[] {
         mediaName ||
         `${platform} Campaign Post`;
       const url = getVal(values, "url");
-      const hashtags =
-        getVal(values, "hashtags") ||
-        getVal(values, "hashtag") ||
-        officialHashtags.join("\n");
       const rawMark = getVal(values, "mark").toLowerCase().trim();
       const mark =
         rawMark === "1" ||
@@ -103,7 +119,7 @@ export function parseMediaItemsFromCSV(csvText: string): MediaItem[] {
         avatar: getAvatar(mediaName || platform),
         checked: false,
         url,
-        hashtags,
+        hashtags: globalHashtags,
         mark,
       };
     })

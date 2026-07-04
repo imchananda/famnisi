@@ -7,6 +7,7 @@ import {
   normalizePlatform,
   officialHashtags,
   parseMediaItemsFromCSV,
+  getGlobalHashtagsFromCSV,
   platforms,
 } from "@/lib/media";
 
@@ -60,6 +61,11 @@ export default function AdminPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [globalHashtags, setGlobalHashtags] = useState<string>(officialHashtags.join("\n"));
+  const [hasConfigRow, setHasConfigRow] = useState(false);
+  const [showHashtagModal, setShowHashtagModal] = useState(false);
+  const [hashtagFormValue, setHashtagFormValue] = useState("");
+  const [isSavingHashtags, setIsSavingHashtags] = useState(false);
   const t = adminText[language];
 
   const loadMedia = useCallback(async (silent = false) => {
@@ -75,6 +81,12 @@ export default function AdminPage() {
 
       const csv = await response.text();
       setItems(parseMediaItemsFromCSV(csv));
+
+      const currentGlobalHashtags = getGlobalHashtagsFromCSV(csv);
+      setGlobalHashtags(currentGlobalHashtags);
+
+      const hasConfig = csv.split("\n").some((line) => line.startsWith("global_settings,"));
+      setHasConfigRow(hasConfig);
     } catch {
       setStatusMessage(t.loadError);
     } finally {
@@ -193,7 +205,10 @@ export default function AdminPage() {
   };
 
   const openAddModal = () => {
-    setFormData(emptyForm);
+    setFormData({
+      ...emptyForm,
+      hashtags: globalHashtags,
+    });
     setSubmitSuccess(false);
     setStatusMessage("");
     setShowModal(true);
@@ -219,6 +234,64 @@ export default function AdminPage() {
     setShowModal(false);
     setSubmitSuccess(false);
     setFormData(emptyForm);
+  };
+
+  const openHashtagsModal = () => {
+    setHashtagFormValue(globalHashtags);
+    setStatusMessage("");
+    setShowHashtagModal(true);
+  };
+
+  const closeHashtagsModal = () => {
+    if (isSavingHashtags) return;
+    setShowHashtagModal(false);
+  };
+
+  const saveGlobalHashtags = async (event: FormEvent) => {
+    event.preventDefault();
+    setStatusMessage("");
+    setIsSavingHashtags(true);
+
+    const payload = {
+      action: hasConfigRow ? "updateRow" : "addRow",
+      sheetGID: "0",
+      data: {
+        id: "global_settings",
+        mark: false,
+        platform: "X",
+        media: "config",
+        title: "global_config",
+        url: "https://config.local",
+        hashtag: hashtagFormValue,
+        hashtags: hashtagFormValue,
+      },
+    };
+
+    try {
+      const response = await fetch("/api/admin/sheet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = (await response.json().catch(() => ({}))) as AdminSheetResponse;
+
+      if (!response.ok || result.response?.ok === false) {
+        const error = result.error || result.response?.error;
+        setStatusMessage(translateAdminError(error, language) || t.submitError);
+        return;
+      }
+
+      setStatusMessage(language === "th" ? "บันทึกแฮชแท็กส่วนกลางสำเร็จ" : "Global hashtags saved successfully.");
+      await loadMedia(true);
+
+      window.setTimeout(() => {
+        setShowHashtagModal(false);
+      }, 900);
+    } catch {
+      setStatusMessage(t.submitError);
+    } finally {
+      setIsSavingHashtags(false);
+    }
   };
 
   const submitForm = async (event: FormEvent) => {
@@ -400,6 +473,13 @@ export default function AdminPage() {
             </button>
             <button
               type="button"
+              onClick={openHashtagsModal}
+              className="h-10 rounded-2xl border border-[#d8b3ad] bg-white px-4 text-xs font-bold uppercase tracking-[0.14em] text-[#6f1d2c] transition hover:border-[#8d2334]"
+            >
+              {language === "th" ? "ตั้งค่าแฮชแท็กส่วนกลาง" : "Set Global Hashtags"}
+            </button>
+            <button
+              type="button"
               onClick={openAddModal}
               className="h-10 rounded-2xl bg-[#2a1114] px-5 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-[0_16px_40px_rgba(42,17,20,0.18)] transition hover:bg-[#6f1d2c]"
             >
@@ -477,15 +557,15 @@ export default function AdminPage() {
 
           <div className="mt-5 overflow-hidden rounded-2xl border border-[#ead3cc] bg-white">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[920px] text-left text-sm">
+              <table className="w-full table-fixed min-w-[800px] text-left text-sm">
                 <thead className="bg-[#fff4f1] text-[10px] font-bold uppercase tracking-[0.16em] text-[#8d2334]">
                   <tr>
-                    <th className="w-16 px-4 py-3 text-center">{t.no}</th>
-                    <th className="w-24 px-4 py-3 text-center">{t.mark}</th>
+                    <th className="w-12 px-4 py-3 text-center">{t.no}</th>
+                    <th className="w-20 px-4 py-3 text-center">{t.mark}</th>
                     <th className="w-20 px-4 py-3 text-center">{t.platform}</th>
-                    <th className="px-4 py-3">{t.media}</th>
-                    <th className="min-w-[280px] px-4 py-3">URL</th>
-                    <th className="min-w-[210px] px-4 py-3">{t.hashtags}</th>
+                    <th className="w-40 lg:w-48 px-4 py-3">{t.media}</th>
+                    <th className="px-4 py-3">URL</th>
+                    <th className="w-44 lg:w-56 px-4 py-3">{t.hashtags}</th>
                     <th className="w-28 px-4 py-3 text-center">{t.manage}</th>
                   </tr>
                 </thead>
@@ -532,7 +612,7 @@ export default function AdminPage() {
                           </div>
                         </td>
                         <td className="px-4 py-4">
-                          <p className="max-w-[240px] truncate font-semibold">
+                          <p className="w-full truncate font-semibold">
                             {item.mediaName || "-"}
                           </p>
                         </td>
@@ -541,13 +621,13 @@ export default function AdminPage() {
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="block max-w-[360px] truncate text-xs font-medium text-[#7c6864] transition hover:text-[#8d2334] hover:underline"
+                            className="block w-full truncate text-xs font-medium text-[#7c6864] transition hover:text-[#8d2334] hover:underline"
                           >
                             {item.url || "-"}
                           </a>
                         </td>
                         <td className="px-4 py-4">
-                          <p className="line-clamp-2 max-w-[260px] whitespace-pre-wrap text-xs leading-relaxed text-[#7c6864]">
+                          <p className="line-clamp-2 w-full whitespace-pre-wrap text-xs leading-relaxed text-[#7c6864]">
                             {item.hashtags || "-"}
                           </p>
                         </td>
@@ -816,6 +896,80 @@ export default function AdminPage() {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      ) : null}
+
+      {showHashtagModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4">
+          <button
+            type="button"
+            className="absolute inset-0 bg-[#2a1114]/45 backdrop-blur-md"
+            onClick={closeHashtagsModal}
+            aria-label="Close"
+          />
+          <div className="relative max-h-[92vh] w-full max-w-lg overflow-hidden rounded-[26px] border border-white/75 bg-[#fffaf6] shadow-[0_30px_100px_rgba(42,17,20,0.28)]">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ead3cc] via-[#8d2334] to-[#2a1114]" />
+
+            <div className="flex items-center justify-between gap-4 border-b border-[#ead3cc] bg-[linear-gradient(135deg,#fffaf6_0%,#f5ded9_100%)] px-4 py-3 sm:px-5">
+              <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-[#8d2334]">
+                {language === "th" ? "ตั้งค่าแฮชแท็กส่วนกลาง" : "Set Global Hashtags"}
+              </h3>
+              <button
+                type="button"
+                onClick={closeHashtagsModal}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/80 text-xs font-bold text-[#7c6864] transition hover:text-[#2a1114]"
+                aria-label="Close"
+              >
+                X
+              </button>
+            </div>
+
+            <form onSubmit={saveGlobalHashtags} className="p-4 sm:p-5">
+              <div className="space-y-4">
+                <div className="rounded-[22px] border border-[#d8b3ad] bg-[#fff4f1]/72 p-4 shadow-[0_12px_34px_rgba(111,29,44,0.06)]">
+                  <label className="admin-label">
+                    {language === "th" ? "แฮชแท็กทั้งหมด (พิมพ์แฮชแท็กโดยเคาะบรรทัดใหม่)" : "Global Hashtags (One per line)"}
+                  </label>
+                  <textarea
+                    required
+                    value={hashtagFormValue}
+                    onChange={(event) => setHashtagFormValue(event.target.value)}
+                    rows={6}
+                    placeholder="#FilmXSiBloom"
+                    className="admin-field min-h-36 resize-none py-3 leading-relaxed"
+                  />
+                  <p className="mt-2 text-xs text-[#7c6864]">
+                    {language === "th"
+                      ? "* การเปลี่ยนแฮชแท็กส่วนกลางนี้จะมีผลต่อแฮชแท็กของทุกโพสต์ และตั้งเป็นค่าเริ่มต้นเวลาแอดมินลงสื่อใหม่ทันที"
+                      : "* Changing the global hashtags will immediately affect all existing posts and set the default value for new posts."}
+                  </p>
+                </div>
+
+                {statusMessage ? (
+                  <p className="rounded-2xl border border-[#ead3cc] bg-white px-4 py-3 text-sm font-semibold text-[#8d2334]">
+                    {statusMessage}
+                  </p>
+                ) : null}
+
+                <div className="flex flex-col-reverse gap-3 sm:grid sm:grid-cols-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeHashtagsModal}
+                    className="h-12 rounded-2xl border border-[#d8b3ad] bg-white px-6 text-sm font-bold uppercase tracking-[0.14em] text-[#6f1d2c] transition hover:border-[#8d2334]"
+                  >
+                    {t.close}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingHashtags}
+                    className="h-12 rounded-2xl bg-[#2a1114] px-7 text-sm font-bold uppercase tracking-[0.16em] text-white shadow-[0_18px_45px_rgba(42,17,20,0.18)] transition hover:bg-[#6f1d2c] disabled:cursor-not-allowed disabled:bg-[#c7aaa4]"
+                  >
+                    {isSavingHashtags ? t.saving : t.saveMedia}
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       ) : null}

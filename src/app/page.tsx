@@ -63,6 +63,7 @@ export default function Home() {
     useState<(typeof platforms)[number]>("All");
   const [sortOrder, setSortOrder] = useState("newest");
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [globalHashtags, setGlobalHashtags] = useState<string>(officialHashtags.join("\n"));
   const checklistSnapshot = useSyncExternalStore(
     subscribeToChecklist,
     getChecklistSnapshot,
@@ -79,10 +80,13 @@ export default function Home() {
       const response = await fetch("/api/media", { cache: "no-store" });
       if (!response.ok) return;
 
-      const data = (await response.json()) as { items?: MediaItem[] };
+      const data = (await response.json()) as { items?: MediaItem[]; globalHashtags?: string };
       if (!Array.isArray(data.items)) return;
 
       setMediaItems(data.items);
+      if (data.globalHashtags) {
+        setGlobalHashtags(data.globalHashtags);
+      }
     } catch {
       // Keep the mock media list if the API is unavailable.
     } finally {
@@ -286,10 +290,9 @@ export default function Home() {
     setGalleryCopiedType(null);
   };
 
-  const galleryShareText = [
-    ...officialHashtags,
-    "@filmracha",
-  ].join("\n");
+  const galleryShareText = useMemo(() => {
+    return `${globalHashtags}\n@filmracha`;
+  }, [globalHashtags]);
 
   const generateGalleryCaption = (language = galleryCaptionLanguage) => {
     setGalleryCaptionLanguage(language);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { mockMediaItems, parseMediaItemsFromCSV } from "@/lib/media";
+import { mockMediaItems, parseMediaItemsFromCSV, getGlobalHashtagsFromCSV, officialHashtags } from "@/lib/media";
 
 export async function GET(request: Request) {
   const sheetId = process.env.SHEET_ID;
@@ -11,6 +11,7 @@ export async function GET(request: Request) {
       configured: false,
       source: "mock",
       items: mockMediaItems,
+      globalHashtags: officialHashtags.join("\n"),
     });
   }
 
@@ -27,6 +28,7 @@ export async function GET(request: Request) {
           source: "mock",
           error: "Failed to fetch Google Sheet. Using mock media.",
           items: mockMediaItems,
+          globalHashtags: officialHashtags.join("\n"),
         },
         { status: 200 },
       );
@@ -34,11 +36,13 @@ export async function GET(request: Request) {
 
     const csvText = await response.text();
     const items = parseMediaItemsFromCSV(csvText);
+    const globalHashtags = getGlobalHashtagsFromCSV(csvText);
 
     return NextResponse.json({
       configured: true,
       source: items.length ? "sheet" : "mock",
       items: items.length ? items : mockMediaItems,
+      globalHashtags,
     });
   } catch {
     return NextResponse.json(
@@ -47,6 +51,7 @@ export async function GET(request: Request) {
         source: "mock",
         error: "Unable to load Google Sheet. Using mock media.",
         items: mockMediaItems,
+        globalHashtags: officialHashtags.join("\n"),
       },
       { status: 200 },
     );
