@@ -3,6 +3,7 @@
 import Image from "next/image";
 import armaniLogo from "../../public/images/GIORGIO_ARMANI_LOGO_2019_B_Plan de travail 1.png";
 import {
+  FormEvent,
   Fragment,
   useCallback,
   useEffect,
@@ -26,6 +27,25 @@ import {
 
 const CHECKLIST_STORAGE_KEY = "film-armani-checklist-v1";
 const LANGUAGE_STORAGE_KEY = "film-armani-language-v1";
+const ADMIN_AUTH_STORAGE_KEY = "film-armani-admin-auth-v1";
+
+const loginText = {
+  th: {
+    title: "เข้าสู่ระบบเพื่อเข้าชมเว็บไซต์",
+    description: "แคมเปญ Film Rachanun x Armani Si Bloom",
+    passwordPlaceholder: "รหัสผ่านแอดมิน",
+    submitButton: "เข้าสู่เว็บไซต์",
+    accessRestricted: "จำกัดการเข้าถึงเฉพาะแอดมินเท่านั้น",
+  },
+  en: {
+    title: "Access Restricted",
+    description: "Film Rachanun x Armani Si Bloom Campaign",
+    passwordPlaceholder: "Admin Password",
+    submitButton: "Enter Website",
+    accessRestricted: "Restricted Access (Admins Only)",
+  },
+};
+
 const DEFAULT_CHECKLIST_SNAPSHOT = JSON.stringify(
   mockMediaItems.filter((item) => item.checked).map((item) => item.id),
 );
@@ -37,6 +57,9 @@ type GalleryItem = {
 };
 
 export default function Home() {
+  const [verified, setVerified] = useState(false);
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState("");
   const [mediaItems, setMediaItems] = useState<MediaItem[]>(mockMediaItems);
   const [activeView, setActiveView] = useState<"media" | "gallery">("media");
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
@@ -224,11 +247,45 @@ export default function Home() {
     return () => window.clearTimeout(timeoutId);
   }, []);
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      if (sessionStorage.getItem(ADMIN_AUTH_STORAGE_KEY) === "true") {
+        setVerified(true);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
   const changeLanguage = (language: MessageLanguage) => {
     setBarLanguage(language);
     setMessageLanguage(language);
     setGalleryCaptionLanguage(language);
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  };
+
+  const verifyPassword = async (event: FormEvent) => {
+    event.preventDefault();
+    setAuthError("");
+
+    const response = await fetch("/api/verify-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: "admin", password }),
+    });
+
+    if (!response.ok) {
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+      if (data.error === "Incorrect password") {
+        setAuthError(barLanguage === "th" ? "รหัสผ่านไม่ถูกต้อง" : "Incorrect password");
+      } else {
+        setAuthError(barLanguage === "th" ? "ไม่สามารถตรวจสอบรหัสผ่านได้" : "Unable to verify password");
+      }
+      return;
+    }
+
+    sessionStorage.setItem(ADMIN_AUTH_STORAGE_KEY, "true");
+    setVerified(true);
   };
 
   const toggleChecked = (id: string) => {
@@ -393,6 +450,86 @@ export default function Home() {
       "noopener,noreferrer",
     );
   };
+  if (!verified) {
+    const tLogin = loginText[barLanguage];
+    return (
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f8efe9] px-5 text-[#2a1114]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ead3cc] via-[#8d2334] to-[#2a1114]" />
+        <div className="pointer-events-none absolute left-1/2 top-[-18rem] h-[38rem] w-[38rem] -translate-x-1/2 rounded-full bg-[#ead3cc]/50 blur-3xl" />
+
+        <form
+          onSubmit={verifyPassword}
+          className="relative z-10 w-full max-w-md rounded-[32px] border border-white/70 bg-[#fffaf6]/90 p-8 shadow-[0_34px_100px_rgba(111,29,44,0.18)] backdrop-blur-xl animate-fade-in"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#8d2334]">
+              {tLogin.accessRestricted}
+            </p>
+            <div className="flex shrink-0 rounded-full border border-[#d8b3ad]/25 bg-[#f8efe9] p-0.5">
+              {(["th", "en"] as const).map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => changeLanguage(lang)}
+                  className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition-all sm:text-[10px] ${
+                    barLanguage === lang
+                      ? "bg-white text-[#2a1114] shadow-sm"
+                      : "text-[#7c6864]/70 hover:text-[#2a1114]"
+                  }`}
+                >
+                  {lang.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col items-center text-center">
+            <Image
+              src={armaniLogo}
+              alt="Giorgio Armani"
+              priority
+              className="h-auto w-48 object-contain"
+            />
+            <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#7c6864]">
+              FILM X ARMANI
+            </p>
+            <h1 className="mt-2 text-2xl font-normal tracking-wide text-[#2a1114] luxury-display">
+              {tLogin.description}
+            </h1>
+          </div>
+
+          <input
+            autoFocus
+            type="password"
+            value={password}
+            onChange={(event) => {
+              setPassword(event.target.value);
+              setAuthError("");
+            }}
+            placeholder={tLogin.passwordPlaceholder}
+            className={`mt-8 h-13 w-full rounded-2xl border bg-white/85 px-5 text-center font-mono text-sm tracking-[0.28em] outline-none transition ${
+              authError
+                ? "border-[#8d2334] ring-4 ring-[#8d2334]/10"
+                : "border-[#d8b3ad] focus:border-[#8d2334]"
+            }`}
+          />
+
+          {authError ? (
+            <p className="mt-3 text-center text-xs font-semibold text-[#8d2334]">
+              {authError}
+            </p>
+          ) : null}
+
+          <button
+            type="submit"
+            className="mt-6 h-12 w-full rounded-2xl bg-[#2a1114] text-sm font-bold uppercase tracking-[0.2em] text-white shadow-[0_18px_40px_rgba(42,17,20,0.22)] transition hover:bg-[#6f1d2c] active:scale-[0.99] cursor-pointer"
+          >
+            {tLogin.submitButton}
+          </button>
+        </form>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-transparent pb-28 text-[#2a1114]">
